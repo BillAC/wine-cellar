@@ -1,0 +1,16 @@
+[Unit]
+Description=Wine Cellar FastAPI application
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=@APP_DIR@
+Environment=WINE_APP_SUPERVISED=systemd
+ExecStart=@APP_DIR@/.venv/bin/python -m uvicorn main:app --host 0.0.0.0 --port 8000
+Restart=always
+RestartSec=2
+KillSignal=SIGTERM
+TimeoutStopSec=20
+
+[Install]
+WantedBy=default.target

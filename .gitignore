@@ -1,0 +1,23 @@
+# Local environment and runtime data
+**/.env
+**/.env.*
+!wine-app/.env.example
+**/*.db
+**/*.db-shm
+**/*.db-wal
+**/uploads
+**/wine-labels/
+**/enrichment_cache.json
+**/enrichment_usage.json
+**/sent_emails.log
+**/uvicorn.log
+
+# Local test photos may contain identifying image metadata
+/test-labels/
+
+# Generated QR sheets can embed the configured cellar URL
+/wine-app/web-page-QR-code/
+/wine-app/wine-bottle-QR-codes/
+
+# Local session-resume pointer
+/agy.txt

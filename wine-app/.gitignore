@@ -1,0 +1,12 @@
+.env
+.env.*
+!.env.example
+.venv/
+__pycache__/
+*.py[cod]
+wine_cellar.db
+uploads/
+wine-labels/
+enrichment_cache.json
+enrichment_usage.json
+*.log

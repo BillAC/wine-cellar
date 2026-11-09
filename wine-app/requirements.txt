@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+sqlalchemy
+pydantic
+python-multipart
+
+qrcode[pil]
+zxing-cpp
+Pillow
+
+python-dotenv
+
+requests

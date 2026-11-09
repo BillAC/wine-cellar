@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#171310">
+    <meta name="description" content="A quiet, considered home for your wine collection.">
+    <title>Cellar Notes — Your wine collection</title>
+    <link rel="stylesheet" href="/static/styles.css?v=20261104k">
+    <script src="/static/app.js?v=20261106a" defer></script>
+</head>
+<body>
+    <div class="grain" aria-hidden="true"></div>
+    <section id="sign-in" class="sign-in" hidden>
+        <div class="sign-in__card">
+            <a class="brand brand--center" href="/" aria-label="Cellar Notes home">
+                <span class="brand__mark" aria-hidden="true">C</span>
+                <span class="brand__name">CELLAR <i>NOTES</i></span>
+            </a>
+            <span class="eyebrow sign-in__eyebrow">A personal wine journal</span>
+            <h1>Your collection,<br><em>beautifully kept.</em></h1>
+            <p class="sign-in__intro">Sign in to return to your cellar.</p>
+            <form id="sign-in-form" class="form-stack">
+                <label for="username">Username or Email</label>
+                <input id="username" name="username" autocomplete="username" required>
+                <label for="password">Password</label>
+                <div class="password-input-wrapper">
+                    <input id="password" name="password" type="password" autocomplete="current-password" required>
+                    <button type="button" class="password-toggle-btn" aria-label="Show password" title="Show password">
+                        <svg class="eye-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    </button>
+                </div>
+                <div class="auth-aux-actions">
+                    <button type="button" id="btn-forgot-password" class="text-button text-button--link">Forgot password?</button>
+                </div>
+                <p id="sign-in-error" class="form-error" role="alert"></p>
+                <button id="sign-in-submit" class="button button--wine button--wide" type="submit">Enter the cellar <span aria-hidden="true">↗</span></button>
+                <div class="auth-footer-prompt">
+                    <span>New here?</span>
+                    <button type="button" id="btn-request-access" class="text-button text-button--underline">Request access</button>
+                </div>
+            </form>
+            <p class="sign-in__foot">Private by nature. Yours by design.</p>
+        </div>
+    </section>
+
+    <div id="cellar" class="app-shell" hidden>
+        <header class="topbar">
+            <a class="brand" href="/" aria-label="Cellar Notes">
+                <span class="brand__mark" aria-hidden="true">C</span>
+                <span class="brand__name">CELLAR <i>NOTES</i></span>
+            </a>
+            <div class="topbar__right">
+                <span class="user-pill" id="current-user-pill"><span class="live-dot"></span> <span id="current-username">cellar</span> <span class="badge" id="current-user-role">admin</span></span>
+                <details id="top-menu" class="top-menu">
+                    <summary class="button button--outline top-menu__toggle">Menu <span aria-hidden="true">⌄</span></summary>
+                    <nav class="top-menu__panel" aria-label="Main menu">
+                        <button id="menu-add-bottle" class="top-menu__item" type="button">Add a bottle</button>
+                        <button id="menu-checkout-bottle" class="top-menu__item" type="button">Check out a bottle</button>
+                        <button id="menu-explorer" class="top-menu__item" type="button">Wine Catalog Explorer</button>
+                        <button id="menu-account" class="top-menu__item" type="button">My Account</button>
+                        <button id="menu-users" class="top-menu__item" type="button" hidden>Users &amp; Access <span id="pending-users-badge" class="badge badge--pill badge--warn" hidden>0</span></button>
+                        <button id="menu-generate-labels" class="top-menu__item" type="button" hidden>Generate Bottle Labels</button>
+                        <button id="menu-settings" class="top-menu__item" type="button">Settings</button>
+                    </nav>
+                </details>
+                <button id="logout" type="button" class="text-button text-button--muted">Sign out</button>
+            </div>
+        </header>
+
+        <main class="page">
+            <section class="welcome">
+                <div>
+                    <p class="eyebrow"><span class="eyebrow__line"></span> THE COLLECTION</p>
+                    <h1>Your cellar,<br><em>beautifully kept.</em></h1>
+                    <p class="welcome__copy">A thoughtful record of the bottles you love<br class="desktop-break"> and the moments you share around them.</p>
+                </div>
+                <div class="welcome__actions">
+                    <button id="add-bottle" type="button" class="button button--wine"><span class="button__plus">+</span> Add a bottle</button>
+                    <button id="checkout-bottle" type="button" class="button button--outline">Check out a bottle</button>
+                    <button id="manage-locations" type="button" class="button button--outline">Storage locations</button>
+                </div>
+            </section>
+
+            <section class="metrics" aria-label="Collection summary">
+                <article id="metric-card-all" class="metric metric--interactive is-active" role="button" tabindex="0" data-color-filter="" title="Show all bottles in the cellar">
+                    <span class="metric__label">IN THE CELLAR</span>
+                    <strong id="metric-total">00</strong>
+                    <span class="metric__note">bottles on hand · click to show all</span>
+                </article>
+                <article id="metric-card-red" class="metric metric--interactive" role="button" tabindex="0" data-color-filter="red" title="Filter collection by Red wines">
+                    <span class="metric__label">RED</span>
+                    <strong id="metric-red">00</strong>
+                    <span class="metric__note">bottles · click to filter</span>
+                </article>
+                <article id="metric-card-white" class="metric metric--interactive" role="button" tabindex="0" data-color-filter="white" title="Filter collection by White wines">
+                    <span class="metric__label">WHITE</span>
+                    <strong id="metric-white">00</strong>
+                    <span class="metric__note">bottles · click to filter</span>
+                </article>
+                <article id="metric-card-rose" class="metric metric--interactive" role="button" tabindex="0" data-color-filter="rose" title="Filter collection by Rosé wines">
+                    <span class="metric__label">ROSÉ</span>
+                    <strong id="metric-rose">00</strong>
+                    <span class="metric__note">bottles · click to filter</span>
+                </article>
+                <article class="metric">
+                    <span class="metric__label">VINTAGES</span>
+                    <strong id="metric-vintages">00</strong>
+                    <span class="metric__note">years represented</span>
+                </article>
+                <article class="metric">
+                    <span class="metric__label">TASTING JOURNAL</span>
+                    <strong id="metric-notes">00</strong>
+                    <span class="metric__note">moments remembered</span>
+                </article>
+                <div class="metrics__ornament" aria-hidden="true">✳</div>
+            </section>
+
+            <section class="collection">
+                <div class="collection__heading">
+                    <div>
+                        <p class="eyebrow"><span class="eyebrow__line"></span> BOTTLE BY BOTTLE</p>
+                        <h2>Your collection</h2>
+                        <p id="collection-count" class="collection__subheading">Loading your cellar…</p>
+                    </div>
+                    <div class="collection__heading-right">
+                        <div class="collection-view-tabs" role="tablist" aria-label="Collection view">
+                            <button id="view-tab-cards" class="collection-view-tab is-active" type="button" role="tab" aria-selected="true" data-view="cards">Cards</button>
+                            <button id="view-tab-table" class="collection-view-tab" type="button" role="tab" aria-selected="false" data-view="table">Table</button>
+                        </div>
+                        <button id="export-csv-btn" class="button button--small button--outline collection__export-btn" type="button" title="Export currently shown bottles to CSV">Export CSV</button>
+                        <span class="collection__count"><span id="visible-count">0</span> WINES SHOWN</span>
+                    </div>
+                </div>
+                <div class="toolbar">
+                    <label class="search">
+                        <span aria-hidden="true">⌕</span>
+                        <input id="search" type="search" placeholder="Search wine, producer, grape, pairing (steak, seafood…), notes, ID…" autocomplete="off">
+                    </label>
+                    <label class="select-wrap">
+                        <span class="sr-only">Filter by color</span>
+                        <select id="color-filter">
+                            <option value="" selected>All colors</option>
+                            <option value="red">Red</option>
+                            <option value="white">White</option>
+                            <option value="rose">Rosé</option>
+                            <option value="sparkling">Sparkling / Champagne</option>
+                            <option value="dessert">Dessert / Fortified</option>
+                            <option value="orange">Orange</option>
+                        </select>
+                    </label>
+                    <label class="select-wrap">
+                        <span class="sr-only">Filter by storage location</span>
+                        <select id="location-filter">
+                            <option value="" selected>All locations</option>
+                        </select>
+                    </label>
+                    <label class="select-wrap">
+                        <span class="sr-only">Filter by bottle status</span>
+                        <select id="status-filter">
+                            <option value="in_cellar" selected>In the collection</option>
+                            <option value="removed">Checked out (inactive)</option>
+                            <option value="all">All bottles</option>
+                        </select>
+                    </label>
+                    <label id="sort-order-wrap" class="select-wrap">
+                        <span class="sr-only">Sort collection</span>
+                        <select id="sort-order">
+                            <option value="recent">Recently added</option>
+                            <option value="name">Name A—Z</option>
+                        </select>
+                    </label>
+                </div>
+                <div id="active-filters-bar" class="active-filters-bar" hidden></div>
+                <div id="wine-grid" class="wine-grid" aria-live="polite"></div>
+                <div id="wine-table-wrap" class="collection-table-wrap" aria-live="polite" hidden></div>
+            </section>
+
+            <section class="storage-section">
+                <div class="storage-section__heading">
+                    <div>
+                        <p class="eyebrow"><span class="eyebrow__line"></span> WHERE IT RESTS</p>
+                        <h2>Storage locations</h2>
+                        <p class="collection__subheading">Organize your cellar, racks, shelves, and fridges.</p>
+                    </div>
+                    <button id="add-location" class="button button--outline" type="button"><span class="button__plus">+</span> Add location</button>
+                </div>
+                <div id="location-list" class="location-list" aria-live="polite"></div>
+            </section>
+            <footer class="page-footer"><span>Made for the bottles worth remembering.</span><span>Cellar Notes <i>·</i> Est. today</span></footer>
+        </main>
+    </div>
+
+    <dialog id="settings-dialog" class="wine-dialog wine-dialog--settings">
+        <div class="dialog__head">
+            <div>
+                <p class="eyebrow"><span class="eyebrow__line"></span> CELLAR PREFERENCES</p>
+                <h2>Settings</h2>
+            </div>
+            <button id="settings-close" class="icon-button" type="button" aria-label="Close settings">×</button>
+        </div>
+        <section class="settings-content">
+            <h3>Server</h3>
+            <p>Restart the cellar service if you have changed server configuration.</p>
+            <button id="restart-server" class="button button--outline" type="button">Restart server</button>
+            <p id="restart-status" class="form-hint" role="status" hidden></p>
+        </section>
+    </dialog>
+
+    <dialog id="wine-dialog" class="wine-dialog">
+        <div class="dialog__head">
+            <div>
+                <p class="eyebrow"><span class="eyebrow__line"></span> ADD TO YOUR COLLECTION</p>
+                <h2>A bottle worth <em>remembering.</em></h2>
+            </div>
+            <button id="dialog-close" class="icon-button" type="button" aria-label="Close dialog">×</button>
+        </div>
+        <form id="manual-form" class="wine-form">
+            <div class="label-scan">
+                <div id="scan-intro">
+                    <strong>Have the bottle nearby?</strong>
+                    <p>Take a photo of its label and we’ll fill in the details we can read.</p>
+                </div>
+                <input id="photo-input" class="label-scan__input" type="file" accept="image/jpeg,image/png,image/webp,image/gif" capture="environment">
+                <button id="scan-label" class="button button--outline" type="button">Scan label <span aria-hidden="true">⌕</span></button>
+                <div id="explorer-callout" class="grapeminds-explorer-callout">
+                    <div class="grapeminds-explorer-callout__text">
+                        <strong>Search online wine catalogs?</strong>
+                        <p>Browse WineAPI.io (with market pricing) or Grapeminds to populate wine details, grapes, pairings, and prices.</p>
+                    </div>
+                    <button id="open-grapeminds-explorer" class="button button--outline" type="button">Catalog Explorer <span aria-hidden="true">↗</span></button>
+                </div>
+                <div id="grapeminds-preview" class="grapeminds-preview" hidden></div>
+                <p id="scan-status" class="form-hint label-scan__status" role="status" hidden></p>
+                <img id="photo-preview" class="label-scan__preview" alt="Preview of selected wine label" hidden>
+            </div>
+            <div id="batch-bottles-summary" class="batch-bottles-summary" hidden></div>
+            <div class="form-grid">
+                <label>QR / bottle ID <span class="required">*</span><input name="qr_id" maxlength="64" placeholder="e.g. CELLAR-042 or 1000" required></label>
+                <label>Number of bottles
+                    <input name="quantity" type="number" min="1" max="100" value="1" required>
+                    <span class="form-hint">For multiple bottles, the QR ID must end in a number; each bottle gets the next ID.</span>
+                </label>
+                <label>Wine name<input name="name" maxlength="200" placeholder="The name on the label"></label>
+                <label>Producer / winery<input name="winery" maxlength="200" placeholder="Who made it?"></label>
+                <label>Vintage<input name="vintage" type="number" min="1800" max="2100" placeholder="2020"></label>
+                <label>Grape varieties<input name="grape_type" maxlength="300" placeholder="e.g. Nebbiolo, Barbera"></label>
+                <label>Region<input name="region" maxlength="200" placeholder="e.g. Barolo, Piedmont"></label>
+                <label>Country of origin<input name="country_of_origin" maxlength="100" placeholder="e.g. South Africa"></label>
+                <label>Purchase price ($)<input name="purchase_price" type="number" min="0" step="0.01" placeholder="What you paid"></label>
+                <label>Market price / value ($)<input name="market_price" type="number" min="0" step="0.01" placeholder="Retail value (e.g. WineAPI.io)"></label>
+                <label>Purchase date<input name="purchase_date" type="date"></label>
+                <label>Drink from (year)<input name="drink_from" type="number" min="1800" max="2200" placeholder="e.g. 2025"></label>
+                <label>Drink until (year)<input name="drink_until" type="number" min="1800" max="2200" placeholder="e.g. 2032"></label>
+                <label class="form-grid__wide">Storage location
+                    <select id="manual-location" name="location_id">
+                        <option value="">No location assigned</option>
+                    </select>
+                </label>
+                <label class="form-grid__wide">Comment
+                    <input name="comment" maxlength="500" placeholder="e.g. Gift from somebody, drink with xxxx">
+                </label>
+            </div>
+            <section class="wine-metadata-form" aria-labelledby="metadata-form-title">
+                <div class="wine-metadata-form__heading">
+                    <h3 id="metadata-form-title">Wine details</h3>
+                    <p>Review and edit Grapeminds details, or add them yourself.</p>
+                </div>
+                <div class="form-grid">
+                    <label>Color
+                        <select name="color">
+                            <option value="">Select color…</option>
+                            <option value="Red">Red</option>
+                            <option value="White">White</option>
+                            <option value="Rosé">Rosé</option>
+                            <option value="Sparkling">Sparkling / Champagne</option>
+                            <option value="Dessert">Dessert / Fortified</option>
+                            <option value="Orange">Orange</option>
+                        </select>
+                    </label>
+                    <label>Grapeminds ID <span class="form-hint" style="display:inline;">(optional)</span>
+                        <input id="grapeminds-id-input" name="grapeminds_id" maxlength="64" placeholder="e.g. 12345">
+                    </label>
+                    <label class="form-grid__wide">Description
+                        <textarea name="description" rows="3" maxlength="5000" placeholder="How would you describe this wine?"></textarea>
+                    </label>
+                    <label class="form-grid__wide">Food pairing
+                        <textarea name="pairing" rows="3" maxlength="5000" placeholder="What food goes well with it?"></textarea>
+                    </label>
+                    <label class="form-grid__wide">Grapeminds tasting notes
+                        <textarea name="grapeminds_tasting_notes" rows="3" maxlength="5000" placeholder="Aromas, palate, and finish"></textarea>
+                    </label>
+                    <fieldset class="flavor-editor form-grid__wide">
+                        <legend>Flavor profile <span class="form-hint">(0–10)</span></legend>
+                        <div class="flavor-editor__grid">
+                            <label>Sweetness<input name="flavor_sweetness" type="number" min="0" max="10" step="0.1" placeholder="—"></label>
+                            <label>Acidity<input name="flavor_acidity" type="number" min="0" max="10" step="0.1" placeholder="—"></label>
+                            <label>Tannins<input name="flavor_tannins" type="number" min="0" max="10" step="0.1" placeholder="—"></label>
+                            <label>Alcohol<input name="flavor_alcohol" type="number" min="0" max="10" step="0.1" placeholder="—"></label>
+                            <label>Body<input name="flavor_body" type="number" min="0" max="10" step="0.1" placeholder="—"></label>
+                            <label>Finish<input name="flavor_finish" type="number" min="0" max="10" step="0.1" placeholder="—"></label>
+                        </div>
+                    </fieldset>
+                </div>
+            </section>
+            <div class="dialog__actions">
+                <div class="dialog__actions-left">
+                    <span id="manual-form-required-hint" class="form-hint"><span class="required">*</span> Required field</span>
+                    <button id="delete-batch-btn" class="button button--outline button--danger" type="button" hidden>Delete batch</button>
+                </div>
+                <div class="dialog__actions-right">
+                    <button id="manual-submit" class="button button--wine" type="submit">Save bottle <span aria-hidden="true">↗</span></button>
+                </div>
+            </div>
+        </form>
+    </dialog>
+
+    <dialog id="location-dialog" class="wine-dialog wine-dialog--location">
+        <div class="dialog__head">
+            <div>
+                <p class="eyebrow"><span class="eyebrow__line"></span> CELLAR ORGANIZATION</p>
+                <h2>Add a <em>location.</em></h2>
+            </div>
+            <button id="location-dialog-close" class="icon-button" type="button" aria-label="Close dialog">×</button>
+        </div>
+        <form id="location-form" class="wine-form">
+            <div class="form-grid">
+                <label>Location name <span class="required">*</span>
+                    <input name="name" maxlength="120" placeholder="e.g. Main cellar, Rack A" required>
+                </label>
+                <label>Area / shelf detail
+                    <input name="sub_location" maxlength="120" placeholder="e.g. Left wall, Shelf 3">
+                </label>
+                <label class="form-grid__wide">Inside another location
+                    <select id="location-parent" name="parent_location_id">
+                        <option value="">Top-level location</option>
+                    </select>
+                </label>
+            </div>
+            <p class="form-hint location-form__hint">Create a top-level space first, then add racks or shelves inside it.</p>
+            <div class="dialog__actions">
+                <span class="form-hint">Locations can be nested as needed.</span>
+                <button id="location-submit" class="button button--wine" type="submit">Save location <span aria-hidden="true">↗</span></button>
+            </div>
+        </form>
+    </dialog>
+
+    <dialog id="removal-dialog" class="wine-dialog wine-dialog--removal">
+        <div class="dialog__head">
+            <div>
+                <p class="eyebrow"><span class="eyebrow__line"></span> BOTTLE CHECKOUT</p>
+                <h2>Check out a <em>bottle.</em></h2>
+                <p id="removal-bottle-info" class="dialog__subtitle" style="margin: 6px 0 0; color: var(--gold); font-size: 13px; font-weight: 500;"></p>
+            </div>
+            <button id="removal-dialog-close" class="icon-button" type="button" aria-label="Close dialog">×</button>
+        </div>
+        <form id="removal-form" class="wine-form">
+            <input type="hidden" id="removal-qr-id" name="qr_id">
+
+            <!-- Group Mode Bottle Picker -->
+            <div id="checkout-group-picker" class="form-stack" style="margin-bottom: 14px;" hidden>
+                <label for="checkout-group-select">Select specific bottle from this group <span class="required">*</span></label>
+                <select id="checkout-group-select">
+                    <option value="">Choose a bottle ID…</option>
+                </select>
+            </div>
+
+            <!-- Bottle ID / QR Code Lookup -->
+            <div id="checkout-lookup-box" class="form-stack" style="margin-bottom: 14px;">
+                <label for="checkout-qr-input">Bottle / QR ID <span class="required">*</span></label>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <input id="checkout-qr-input" list="checkout-bottle-datalist" placeholder="Enter bottle ID (e.g. 1024) or scan QR…" autocomplete="off" style="flex: 1; min-width: 180px;">
+                    <datalist id="checkout-bottle-datalist"></datalist>
+                    <button id="checkout-find-btn" class="button button--outline" type="button">Find bottle</button>
+                    <button id="checkout-scan-qr-btn" class="button button--outline" type="button">Scan QR 📷</button>
+                    <input id="checkout-qr-file" type="file" accept="image/*" capture="environment" hidden>
+                </div>
+                <div id="checkout-video-wrap" style="margin-top: 10px;" hidden>
+                    <video id="checkout-qr-video" playsinline muted style="width: 100%; max-height: 220px; border: 1px solid var(--line); border-radius: 2px; background: #000;"></video>
+                    <button id="checkout-stop-video" class="button button--small button--outline" type="button" style="margin-top: 6px;">Stop camera</button>
+                </div>
+                <p id="checkout-lookup-status" class="form-hint" role="status" hidden></p>
+                <p id="checkout-lookup-error" class="form-error" role="alert" hidden></p>
+            </div>
+
+            <div id="checkout-details-section">
+                <div class="form-grid">
+                    <label>Checkout date <span class="required">*</span>
+                        <input id="removal-date" type="date" name="checkout_date" required>
+                    </label>
+                    <label>Comment (occasion, opened, gifted to…)
+                        <input id="removal-comment" name="comment" maxlength="500" value="Opened" placeholder="e.g. Opened, occasion, or gifted to xxxx">
+                    </label>
+                    <label class="form-grid__wide">Taste / Tasting notes
+                        <textarea id="removal-taste" name="grapeminds_tasting_notes" rows="2" maxlength="5000" placeholder="Update taste profile, aromas, palate, and finish…"></textarea>
+                    </label>
+                    <label class="form-grid__wide">Food pairing
+                        <textarea id="removal-pairing" name="pairing" rows="2" maxlength="5000" placeholder="Update food pairings…"></textarea>
+                    </label>
+                </div>
+
+                <div class="removal-tasting-toggle" style="margin: 12px 0 8px;">
+                    <label class="checkbox-label" style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; color: var(--ink);">
+                        <input type="checkbox" id="removal-record-note">
+                        <span>Also add a dated entry &amp; sensory ratings to the tasting journal</span>
+                    </label>
+                </div>
+
+                <div id="removal-note-fields" hidden>
+                    <div class="form-grid">
+                        <label class="form-grid__wide">Journal note (optional)
+                            <textarea id="removal-notes" name="notes" rows="2" maxlength="1000" placeholder="Memorable moments, impressions…"></textarea>
+                        </label>
+                    </div>
+
+                    <div class="removal-sensory-grid" style="margin-top: 10px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; background: var(--panel-raised); padding: 16px; border: 1px solid var(--line); border-radius: 2px;">
+                        <div class="slider-field">
+                            <div class="slider-field__head" style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px;">
+                                <label for="removal-tannin">Tannin</label>
+                                <span id="removal-tannin-val" style="color: var(--gold); font-weight: 600;">0.5</span>
+                            </div>
+                            <input id="removal-tannin" name="tannin" type="range" min="0" max="1" step="0.1" value="0.5" style="width: 100%;">
+                        </div>
+                        <div class="slider-field">
+                            <div class="slider-field__head" style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px;">
+                                <label for="removal-acidity">Acidity</label>
+                                <span id="removal-acidity-val" style="color: var(--gold); font-weight: 600;">0.5</span>
+                            </div>
+                            <input id="removal-acidity" name="acidity" type="range" min="0" max="1" step="0.1" value="0.5" style="width: 100%;">
+                        </div>
+                        <div class="slider-field">
+                            <div class="slider-field__head" style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px;">
+                                <label for="removal-body">Body</label>
+                                <span id="removal-body-val" style="color: var(--gold); font-weight: 600;">0.5</span>
+                            </div>
+                            <input id="removal-body" name="body" type="range" min="0" max="1" step="0.1" value="0.5" style="width: 100%;">
+                        </div>
+                        <div class="slider-field">
+                            <div class="slider-field__head" style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px;">
+                                <label for="removal-alcohol">Alcohol</label>
+                                <span id="removal-alcohol-val" style="color: var(--gold); font-weight: 600;">0.5</span>
+                            </div>
+                            <input id="removal-alcohol" name="alcohol" type="range" min="0" max="1" step="0.1" value="0.5" style="width: 100%;">
+                        </div>
+                        <div class="slider-field">
+                            <div class="slider-field__head" style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px;">
+                                <label for="removal-fruit">Fruit intensity</label>
+                                <span id="removal-fruit-val" style="color: var(--gold); font-weight: 600;">0.5</span>
+                            </div>
+                            <input id="removal-fruit" name="fruit_intensity" type="range" min="0" max="1" step="0.1" value="0.5" style="width: 100%;">
+                        </div>
+                        <div style="grid-column: 1 / -1; margin-top: 4px;">
+                            <label style="font-size: 11px;">Aroma descriptors (comma-separated)
+                                <input id="removal-aroma-tags" name="aroma_tags" placeholder="e.g. Blackberry, Oak, Earth, Vanilla" maxlength="255" style="margin-top: 4px;">
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="checkout-scope-prompt" class="labels-conflict-alert" style="margin-top: 14px;" hidden>
+                <strong style="display: block; margin-bottom: 6px; color: var(--gold);">Apply taste &amp; pairing updates to other bottles?</strong>
+                <p id="checkout-scope-msg" style="margin: 0 0 10px; font-size: 12px; color: var(--ink);"></p>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <button id="checkout-scope-all" type="button" class="button button--small button--wine">Apply to all bottles of this wine</button>
+                    <button id="checkout-scope-one" type="button" class="button button--small button--outline">Only this bottle</button>
+                    <button id="checkout-scope-cancel" type="button" class="button button--small button--outline">Cancel</button>
+                </div>
+            </div>
+
+            <p class="form-hint removal-banner" style="margin: 16px 0 0; padding: 10px 14px; background: rgba(132, 46, 63, 0.15); border: 1px solid var(--wine); border-radius: 2px; color: var(--ink); font-size: 11px;">
+                🍷 Checking out marks this bottle as inactive in your collection while preserving its full record, checkout date, comment, and tasting history in the database.
+            </p>
+
+            <div class="dialog__actions">
+                <button id="removal-cancel" class="button button--outline" type="button">Cancel</button>
+                <button id="removal-submit" class="button button--wine" type="submit">Check out bottle <span aria-hidden="true">↗</span></button>
+            </div>
+        </form>
+    </dialog>
+
+    <!-- Request Access Dialog -->
+    <dialog id="request-access-dialog" class="wine-dialog wine-dialog--auth-modal">
+        <div class="dialog__head">
+            <div>
+                <p class="eyebrow"><span class="eyebrow__line"></span> NEW ACCOUNT</p>
+                <h2>Request Cellar Access</h2>
+            </div>
+            <button id="req-dialog-close" class="icon-button" type="button" aria-label="Close dialog">×</button>
+        </div>
+        <form id="request-access-form" class="wine-form">
+            <p class="form-hint" style="margin-bottom: 16px;">
+                Submit your details to request an account. Once approved by the cellar administrator, you will receive an email.
+            </p>
+            <div class="form-stack">
+                <label for="req-username">Desired Username</label>
+                <input id="req-username" name="username" placeholder="e.g. william, rita" required minlength="3" maxlength="30" autocomplete="username">
+
+                <label for="req-email">Email Address</label>
+                <input id="req-email" name="email" type="email" placeholder="you@example.com" required autocomplete="email">
+
+                <label for="req-password">Initial Password (optional)</label>
+                <div class="password-input-wrapper">
+                    <input id="req-password" name="password" type="password" placeholder="Min 8 characters" minlength="8" autocomplete="new-password">
+                    <button type="button" class="password-toggle-btn" aria-label="Show password" title="Show password">
+                        <svg class="eye-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    </button>
+                </div>
+
+                <label for="req-confirm-password">Confirm Password</label>
+                <div class="password-input-wrapper">
+                    <input id="req-confirm-password" name="confirm_password" type="password" placeholder="Repeat password" minlength="8" autocomplete="new-password">
+                    <button type="button" class="password-toggle-btn" aria-label="Show password" title="Show password">
+                        <svg class="eye-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    </button>
+                </div>
+            </div>
+            <p id="req-feedback" class="form-error" role="alert" style="margin-top: 14px;"></p>
+            <div class="dialog__actions">
+                <button id="req-cancel" class="button button--outline" type="button">Cancel</button>
+                <button id="req-submit" class="button button--wine" type="submit">Submit Request <span aria-hidden="true">↗</span></button>
+            </div>
+        </form>
+    </dialog>
+
+    <!-- Forgot Password Dialog -->
+    <dialog id="forgot-password-dialog" class="wine-dialog wine-dialog--auth-modal">
+        <div class="dialog__head">
+            <div>
+                <p class="eyebrow"><span class="eyebrow__line"></span> RECOVER ACCESS</p>
+                <h2>Forgot Password</h2>
+            </div>
+            <button id="forgot-dialog-close" class="icon-button" type="button" aria-label="Close dialog">×</button>
+        </div>
+        <form id="forgot-password-form" class="wine-form">
+            <p class="form-hint" style="margin-bottom: 16px;">
+                Enter your username or email address and we will send you a secure link to reset your password.
+            </p>
+            <div class="form-stack">
+                <label for="forgot-identifier">Username or Email</label>
+                <input id="forgot-identifier" name="identifier" placeholder="e.g. william or william@example.com" required autocomplete="username">
+            </div>
+            <p id="forgot-feedback" class="form-error" role="alert" style="margin-top: 14px;"></p>
+            <div class="dialog__actions">
+                <button id="forgot-cancel" class="button button--outline" type="button">Cancel</button>
+                <button id="forgot-submit" class="button button--wine" type="submit">Send Reset Link <span aria-hidden="true">↗</span></button>
+            </div>
+        </form>
+    </dialog>
+
+    <!-- Reset Password Dialog -->
+    <dialog id="reset-password-dialog" class="wine-dialog wine-dialog--auth-modal">
+        <div class="dialog__head">
+            <div>
+                <p class="eyebrow"><span class="eyebrow__line"></span> ACCOUNT SECURITY</p>
+                <h2>Choose New Password</h2>
+            </div>
+            <button id="reset-dialog-close" class="icon-button" type="button" aria-label="Close dialog">×</button>
+        </div>
+        <form id="reset-password-form" class="wine-form">
+            <input type="hidden" id="reset-token" name="token">
+            <p class="form-hint" style="margin-bottom: 16px;">
+                Enter your new password below.
+            </p>
+            <div class="form-stack">
+                <label for="reset-new-password">New Password</label>
+                <div class="password-input-wrapper">
+                    <input id="reset-new-password" name="new_password" type="password" required minlength="8" autocomplete="new-password">
+                    <button type="button" class="password-toggle-btn" aria-label="Show password" title="Show password">
+                        <svg class="eye-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    </button>
+                </div>
+
+                <label for="reset-confirm-password">Confirm New Password</label>
+                <div class="password-input-wrapper">
+                    <input id="reset-confirm-password" name="confirm_password" type="password" required minlength="8" autocomplete="new-password">
+                    <button type="button" class="password-toggle-btn" aria-label="Show password" title="Show password">
+                        <svg class="eye-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    </button>
+                </div>
+            </div>
+            <p id="reset-feedback" class="form-error" role="alert" style="margin-top: 14px;"></p>
+            <div class="dialog__actions">
+                <button id="reset-cancel" class="button button--outline" type="button">Cancel</button>
+                <button id="reset-submit" class="button button--wine" type="submit">Update Password <span aria-hidden="true">↗</span></button>
+            </div>
+        </form>
+    </dialog>
+
+    <!-- My Account Dialog -->
+    <dialog id="account-dialog" class="wine-dialog wine-dialog--settings">
+        <div class="dialog__head">
+            <div>
+                <p class="eyebrow"><span class="eyebrow__line"></span> USER PROFILE</p>
+                <h2>My Account</h2>
+            </div>
+            <button id="account-close" class="icon-button" type="button" aria-label="Close dialog">×</button>
+        </div>
+        <div class="wine-form">
+            <div class="account-summary-card" style="padding: 14px 18px; background: var(--panel-raised); border: 1px solid var(--line); border-radius: 2px; margin-bottom: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <span style="font-size: 11px; text-transform: uppercase; color: var(--gold); letter-spacing: 0.08em;">Username</span>
+                    <strong id="account-username-display" style="font-size: 14px; color: var(--ink);">—</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <span style="font-size: 11px; text-transform: uppercase; color: var(--gold); letter-spacing: 0.08em;">Email</span>
+                    <span id="account-email-display" style="font-size: 13px; color: var(--muted);">—</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 11px; text-transform: uppercase; color: var(--gold); letter-spacing: 0.08em;">Role</span>
+                    <span id="account-role-display" class="badge">user</span>
+                </div>
+            </div>
+
+            <h3 style="font: 18px var(--serif); margin: 0 0 12px; color: var(--ink);">Change Password</h3>
+            <form id="change-password-form" class="form-stack">
+                <label for="change-curr-password">Current Password</label>
+                <div class="password-input-wrapper">
+                    <input id="change-curr-password" name="current_password" type="password" required autocomplete="current-password">
+                    <button type="button" class="password-toggle-btn" aria-label="Show password" title="Show password">
+                        <svg class="eye-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    </button>
+                </div>
+
+                <label for="change-new-password">New Password</label>
+                <div class="password-input-wrapper">
+                    <input id="change-new-password" name="new_password" type="password" required minlength="8" autocomplete="new-password">
+                    <button type="button" class="password-toggle-btn" aria-label="Show password" title="Show password">
+                        <svg class="eye-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    </button>
+                </div>
+
+                <label for="change-confirm-password">Confirm New Password</label>
+                <div class="password-input-wrapper">
+                    <input id="change-confirm-password" name="confirm_password" type="password" required minlength="8" autocomplete="new-password">
+                    <button type="button" class="password-toggle-btn" aria-label="Show password" title="Show password">
+                        <svg class="eye-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    </button>
+                </div>
+
+                <p id="change-password-feedback" class="form-error" role="alert" style="margin-top: 10px;"></p>
+
+                <div class="dialog__actions" style="margin-top: 16px;">
+                    <button id="account-cancel" class="button button--outline" type="button">Close</button>
+                    <button id="change-password-submit" class="button button--wine" type="submit">Update Password <span aria-hidden="true">↗</span></button>
+                </div>
+            </form>
+        </div>
+    </dialog>
+
+    <!-- Users & Access Management Dialog (Admin Only) -->
+    <dialog id="users-dialog" class="wine-dialog wine-dialog--users">
+        <div class="dialog__head">
+            <div>
+                <p class="eyebrow"><span class="eyebrow__line"></span> ACCESS CONTROL</p>
+                <h2>Users &amp; Permissions</h2>
+            </div>
+            <button id="users-dialog-close" class="icon-button" type="button" aria-label="Close dialog">×</button>
+        </div>
+        <div class="wine-form">
+            <div class="users-tabs" role="tablist">
+                <button type="button" id="tab-btn-pending" class="users-tab-btn users-tab-btn--active" role="tab" aria-selected="true">
+                    Pending Requests <span id="pending-tab-badge" class="badge badge--pill badge--warn" style="margin-left: 6px;">0</span>
+                </button>
+                <button type="button" id="tab-btn-active" class="users-tab-btn" role="tab" aria-selected="false">
+                    All Accounts (<span id="all-users-count">0</span>)
+                </button>
+            </div>
+
+            <!-- Pending Requests Tab Panel -->
+            <div id="panel-pending-users" class="users-tab-panel" role="tabpanel">
+                <div id="pending-users-list" class="pending-users-container">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
+            <!-- All Users Tab Panel -->
+            <div id="panel-all-users" class="users-tab-panel" role="tabpanel" hidden>
+                <div class="table-responsive">
+                    <table class="users-table">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th>Last Login</th>
+                                <th style="text-align: right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="all-users-tbody">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="dialog__actions" style="margin-top: 20px;">
+                <button id="users-refresh-btn" class="button button--outline" type="button">↻ Refresh List</button>
+                <button id="users-done-btn" class="button button--wine" type="button">Done</button>
+            </div>
+        </div>
+    </dialog>
+
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+    <!-- Grapeminds Explorer -->
+    <section id='grapeminds-explorer' class='page' style='display: none; padding: 40px 24px;' hidden>
+        <button id='explorer-back' type='button' class='explorer-back-button'>← Back to cellar</button>
+        <div class='explorer-header'>
+            <h2 style='margin:0'>Wine Catalog Explorer</h2>
+            <p id='explorer-subtitle' style='color: var(--muted); font-size: 12px;'>Search WineAPI.io (default, includes US pricing) or Grapeminds with automatic fallback.</p>
+        </div>
+
+        <div class='explorer-search' style='margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap;'>
+            <input type='text' id='explorer-query' placeholder='Search by producer, wine name, or appellation...' class='search' style='flex: 1; min-width: 220px;'>
+            <label class='select-wrap' style='height: 43px; min-width: 210px;'>
+                <span class='sr-only'>Catalog provider</span>
+                <select id='explorer-provider'>
+                    <option value='wineapi' selected>WineAPI.io (default · US &amp; prices)</option>
+                    <option value='grapeminds'>Grapeminds (EU / Global)</option>
+                    <option value='both'>Both APIs combined</option>
+                </select>
+            </label>
+            <button id='explorer-button' type='button' class='button button--wine'>Search</button>
+            <button id='explorer-cancel' type='button' class='button button--outline'>Cancel</button>
+        </div>
+        <p id='explorer-provider-notice' class='form-hint' style='margin-top: 10px; color: var(--gold);' hidden></p>
+
+        <div id='explorer-results-container' style='margin-top: 20px;'>
+            <table id='explorer-results-table' class='explorer-table' style='display: none; width: 100%; border-collapse: collapse; border: 1px solid var(--line);'>
+                <thead style='background: var(--panel-raised);'>
+                    <tr style='text-align: left; font-size: 11px; color: var(--gold);'>
+                        <th style='padding: 10px; border: 1px solid var(--line);'>ID</th>
+                        <th style='padding: 10px; border: 1px solid var(--line);'>Wine Name</th>
+                        <th style='padding: 10px; border: 1px solid var(--line);'>Producer</th>
+                        <th style='padding: 10px; border: 1px solid var(--line);'>Region / Style</th>
+                        <th style='padding: 10px; border: 1px solid var(--line); text-align: center;'>Action</th>
+                    </tr>
+                </thead>
+                <tbody id='explorer-results-body' style='font-size: 12px; color: var(--ink);'></tbody>
+            </table>
+            <div id='explorer-empty' class='empty-state' style='display: none;'>
+                <h3 style='margin:0'>No results found</h3>
+            </div>
+            <div id='explorer-loading' class='empty-state' style='display: none;'>
+                <h3 style='margin:0'>Searching...</h3>
+            </div>
+        </div>
+
+        <div class='explorer-footer-actions' style='margin-top: 20px; display: flex; justify-content: flex-end;'>
+            <button id='explorer-cancel-bottom' type='button' class='button button--outline'>Cancel</button>
+        </div>
+
+        <!-- Detail Modal -->
+        <div id='explorer-modal' class='wine-dialog' style='display: none; position: fixed; z-index: 1000; top: 50%; left: 50%; transform: translate(-50%, -50%); max-width: 500px; width: 90%;'>
+            <div class='dialog__head'>
+                <h2 style='margin:0; font-size: 20px;'>Wine Details</h2>
+                <button id='explorer-close' class='icon-button' type='button' aria-label='Close'>×</button>
+            </div>
+            <div id='explorer-detail-content' class='wine-metadata' style='padding: 20px;'>
+                <!-- JS Content -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Generate Bottle Labels Dialog (Admin Only) -->
+    <dialog id="generate-labels-dialog" class="wine-dialog wine-dialog--labels">
+        <div class="dialog__head">
+            <div>
+                <p class="eyebrow"><span class="eyebrow__line"></span> ADMIN TOOLS</p>
+                <h2>Generate Bottle Labels</h2>
+            </div>
+            <button id="labels-dialog-close" class="icon-button" type="button" aria-label="Close dialog">×</button>
+        </div>
+        <form id="generate-labels-form" class="wine-form">
+            <div class="template-spec-card">
+                <div class="template-spec-header">
+                    <strong>SpartanIndustrial® R001</strong>
+                    <span class="badge badge--pill badge--warn">160 Labels / Sheet</span>
+                </div>
+                <p class="template-spec-desc">
+                    Generates 160 printable rectangular labels (1″ × 0.5″) arranged in 8 columns × 20 rows on standard 8.5″ × 11″ Letter paper. Each label includes a scannable QR code linking to the bottle record and a clear bottle identifier. Print at 100% / Actual Size.
+                </p>
+            </div>
+
+            <div class="form-stack" style="margin-top: 16px;">
+                <label for="label-start-id">
+                    Starting Label Identifier
+                    <span class="form-hint" style="margin: 0; font-weight: normal;">(e.g., 1048 or Rack-1000)</span>
+                </label>
+                <input id="label-start-id" name="starting_label" type="text" required placeholder="e.g. 1048" autocomplete="off" maxlength="64">
+
+                <div id="labels-preview-summary" class="labels-preview-box">
+                    <div class="labels-preview-row">
+                        <span>Range:</span>
+                        <strong id="labels-range-text">160 labels: 1048 through 1159</strong>
+                    </div>
+                    <div class="labels-preview-row">
+                        <span>Layout:</span>
+                        <span>8 columns × 20 rows (1″ × 0.5″)</span>
+                    </div>
+                </div>
+
+                <div id="labels-conflict-alert" class="labels-conflict-alert" hidden>
+                    <p id="labels-conflict-msg">⚠️ Some numbers in this range were previously generated or already exist in the cellar.</p>
+                    <label class="checkbox-label" style="display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 11px; cursor: pointer; color: var(--ink);">
+                        <input id="labels-force-checkbox" type="checkbox" name="force">
+                        <span>Generate anyway (overwrite previous sheet sequence)</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="dialog__actions" style="margin-top: 24px;">
+                <button id="labels-cancel-btn" class="button button--outline" type="button">Cancel</button>
+                <button id="labels-submit-btn" class="button button--wine" type="submit">
+                    Generate &amp; Download PDF ↗
+                </button>
+            </div>
+        </form>
+    </dialog>
+</body>
+</html>
