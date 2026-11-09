@@ -10,6 +10,8 @@ See [`wine-app/README.md`](./wine-app/README.md) for detailed feature
 documentation, provider configuration, account management, QR label generation,
 and systemd deployment.
 
+![Cellar Notes screenshot](wine-app/docs/Screenshot%202026-11-09%20144305.jpg)
+
 ## Features
 
 - Manage bottle records and nested storage locations, individually or in
